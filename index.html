@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Absolute Emoji Hub - Admin Edition</title>
+    <title>Absolute Emoji Hub - Absolute Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --absolute-bg: #0d1117;
             --absolute-card: #161b22;
             --absolute-border: #30363d;
-            --absolute-blue: #58a6ff;
+            --absolute-blue: #6366f1; /* Ana site rengine yaklaştırdım */
             --absolute-green: #238636;
             --absolute-text: #c9d1d9;
             --absolute-gold: #d29922;
@@ -28,7 +28,6 @@
 
         .glass-panel { background: var(--absolute-card); border: 1px solid var(--absolute-border); border-radius: 12px; padding: 30px; width: 100%; max-width: 450px; text-align: center; margin-top: 40px; }
         
-        /* ADMIN PANEL ÖZEL STİLLERİ */
         #admin-panel { display: none; width: 90%; max-width: 800px; background: var(--absolute-card); border: 2px solid var(--absolute-gold); border-radius: 16px; padding: 25px; margin: 20px 0; }
         .admin-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--absolute-border); }
         .user-list-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
@@ -38,7 +37,7 @@
         .story-card { background: var(--absolute-card); border: 1px solid var(--absolute-border); border-radius: 16px; padding: 25px; margin-bottom: 25px; }
         
         button { cursor: pointer; border-radius: 8px; border: 1px solid var(--absolute-border); padding: 12px 24px; font-weight: 600; font-family: inherit; }
-        .btn-primary { background: var(--absolute-green); color: white; border: none; }
+        .btn-primary { background: var(--absolute-blue); color: white; border: none; }
         .btn-outline { background: transparent; color: var(--absolute-text); }
         .btn-admin-toggle { border-color: var(--absolute-gold); color: var(--absolute-gold); background: transparent; }
         
@@ -54,34 +53,27 @@
     <div class="logo">ABSOLUTE <span style="color:var(--absolute-blue)">EMOJI</span></div>
     <div id="nav-actions">
         <button id="admin-btn" class="hidden btn-admin-toggle" onclick="toggleAdminPanel()">👑 YÖNETİM</button>
-        <button onclick="logout()" class="btn-outline" style="margin-left:10px">Çıkış</button>
+        <button onclick="logout()" class="btn-outline" style="margin-left:10px">Ana Sayfaya Dön</button>
     </div>
 </nav>
 
 <div id="auth-screen" class="glass-panel">
-    <h2>Erişim Sağla</h2>
-    <input type="email" id="email" placeholder="E-posta">
-    <input type="password" id="pass" placeholder="Şifre">
-    <button onclick="handleAuth('login')" class="btn-primary" style="width:100%; margin-top:10px">Giriş Yap</button>
-    <button onclick="handleAuth('signup')" class="btn-outline" style="width:100%; margin-top:10px">Kayıt Ol</button>
+    <h2>Erişim Engellendi</h2>
+    <p style="margin: 20px 0; color: gray;">Bu oyunu oynamak için Absolute ana sayfasından giriş yapmış olman gerekiyor.</p>
+    <button onclick="location.href='https://kuzeymurt00-blip.github.io/Website/'" class="btn-primary" style="width:100%">Giriş Yapmaya Git</button>
 </div>
 
 <div id="admin-panel">
     <h2 style="color:var(--absolute-gold); margin-top:0;">🛡️ Absolute Kontrol Merkezi</h2>
-    
     <div class="admin-section">
         <h3>📢 Global Duyuru Yönetimi</h3>
         <input type="text" id="new-marquee" placeholder="Yeni duyuru metni...">
         <button onclick="updateMarquee()" class="btn-primary">Duyuruyu Güncelle</button>
     </div>
-
     <div class="admin-section">
         <h3>👥 Kayıtlı Kullanıcılar <span id="user-total" class="user-count">0</span></h3>
-        <div id="user-list-container" style="max-height: 200px; overflow-y: auto; background: var(--absolute-bg); border-radius: 8px; padding: 10px; margin-top: 10px;">
-            Yükleniyor...
-        </div>
+        <div id="user-list-container" style="max-height: 200px; overflow-y: auto; background: var(--absolute-bg); border-radius: 8px; padding: 10px; margin-top: 10px;">Yükleniyor...</div>
     </div>
-    
     <button onclick="toggleAdminPanel()" class="btn-outline" style="margin-top:20px; width:100%">Paneli Kapat</button>
 </div>
 
@@ -109,16 +101,18 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // --- BURAYI GÜNCELLE KISMI ---
     const firebaseConfig = {
-        apiKey: "AIzaSyAK0_OUGrQDQcv-GC38DI2XHfjXkP6mtXE",
-        authDomain: "emojihikaye-73ce7.firebaseapp.com",
-        projectId: "emojihikaye-73ce7",
-        storageBucket: "emojihikaye-73ce7.firebasestorage.app",
-        messagingSenderId: "192587902676",
-        appId: "1:192587902676:web:5626602357b4a5effa9541"
+      apiKey: "AIzaSyC29HXKSTcXx5-BuLrt6h8iH4BUh3jnNes",
+      authDomain: "absolutebisite.firebaseapp.com",
+      projectId: "absolutebisite",
+      storageBucket: "absolutebisite.firebasestorage.app",
+      messagingSenderId: "648450986989",
+      appId: "1:648450986989:web:17ff5e9a4ffd1577354de4",
+      measurementId: "G-EXPBEZ198Z"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -128,18 +122,26 @@
     let currentUser = null;
     let isAdmin = false;
 
-    // DURUM TAKİBİ
-    onAuthStateChanged(auth, (user) => {
+    // OTOMATİK HESAP KONTROLÜ
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('game-area').classList.remove('hidden');
-            document.getElementById('display-name').innerText = user.email.split('@')[0];
             
-            if(user.email === "kuzey@admin.com") {
+            // Ana sitedeki kullanıcı adını çekme (all_users koleksiyonundan)
+            const userDoc = await getDoc(doc(db, "all_users", user.uid));
+            if(userDoc.exists()){
+                document.getElementById('display-name').innerText = userDoc.data().username;
+            } else {
+                document.getElementById('display-name').innerText = user.email.split('@')[0];
+            }
+            
+            // Admin kontrolü (Senin mailin)
+            if(user.email === "kuzeymurt00@gmail.com") {
                 isAdmin = true;
                 document.getElementById('admin-btn').classList.remove('hidden');
-                loadUserList(); // Adminse listeyi yükle
+                loadUserList(); 
             }
         } else {
             document.getElementById('auth-screen').classList.remove('hidden');
@@ -147,29 +149,13 @@
         }
     });
 
-    // GİRİŞ / KAYIT VE KULLANICIYI VERİTABANINA EKLEME
-    window.handleAuth = async (type) => {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
-        try {
-            if(type === 'signup') {
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                // Yeni kayıt olanı 'users' koleksiyonuna ekle
-                await setDoc(doc(db, "users", cred.user.uid), {
-                    email: email,
-                    joinDate: serverTimestamp()
-                });
-            } else {
-                await signInWithEmailAndPassword(auth, email, pass);
-            }
-        } catch(e) { alert("Hata: " + e.message); }
-    };
+    window.logout = () => signOut(auth).then(() => {
+        window.location.href = "https://kuzeymurt00-blip.github.io/Website/";
+    });
 
-    window.logout = () => signOut(auth).then(() => location.reload());
-
-    // ADMİN: KULLANICI LİSTESİNİ ÇEKME
+    // ADMİN: KULLANICI LİSTESİ
     function loadUserList() {
-        onSnapshot(collection(db, "users"), (snap) => {
+        onSnapshot(collection(db, "all_users"), (snap) => {
             const listCont = document.getElementById('user-list-container');
             document.getElementById('user-total').innerText = snap.size;
             listCont.innerHTML = "";
@@ -177,24 +163,24 @@
                 const userData = userDoc.data();
                 const item = document.createElement('div');
                 item.className = 'user-list-item';
-                item.innerHTML = `<span>📧 ${userData.email}</span> <span style="color:#666; font-size:0.7rem">ID: ${userDoc.id.substring(0,5)}...</span>`;
+                item.innerHTML = `<span>👤 ${userData.username || 'İsimsiz'}</span> <span style="color:#666; font-size:0.7rem">${userData.email}</span>`;
                 listCont.appendChild(item);
             });
         });
     }
 
-    // ADMİN: DUYURU
+    // DUYURU SİSTEMİ
     window.updateMarquee = async () => {
         const txt = document.getElementById('new-marquee').value;
         await setDoc(doc(db, "settings", "marquee"), { text: txt });
-        alert("Sistem duyurusu güncellendi!");
+        alert("Duyuru güncellendi!");
     };
 
     onSnapshot(doc(db, "settings", "marquee"), (docSnap) => {
         if(docSnap.exists()) document.getElementById('marquee-text').innerText = docSnap.data().text;
     });
 
-    // OYUN VE HİKAYE SİSTEMİ
+    // OYUN FONKSİYONLARI
     let selectedEmojis = "";
     window.runScanner = () => {
         const overlay = document.getElementById('scanner-overlay');
@@ -223,8 +209,9 @@
     window.saveStory = async () => {
         const content = document.getElementById('storyInput').value;
         if(!content) return;
+        const name = document.getElementById('display-name').innerText;
         await addDoc(collection(db, "stories"), {
-            user: currentUser.email, emojis: selectedEmojis, text: content, votes: 0, time: serverTimestamp()
+            user: name, emojis: selectedEmojis, text: content, votes: 0, time: serverTimestamp()
         });
         location.reload();
     };
@@ -237,9 +224,9 @@
             const card = document.createElement('div');
             card.className = 'story-card';
             card.innerHTML = `
-                <div style="color:var(--absolute-blue); font-size:0.8rem; font-weight:600; margin-bottom:10px;">@${d.user.split('@')[0].toUpperCase()}</div>
+                <div style="color:var(--absolute-blue); font-size:0.8rem; font-weight:600; margin-bottom:10px;">@${d.user.toUpperCase()}</div>
                 <div style="font-size:2rem; margin-bottom:15px;">${d.emojis}</div>
-                <p>${d.text}</p>
+                <p style="line-height:1.6">${d.text}</p>
                 <div style="display:flex; justify-content:space-between; margin-top:15px;">
                     <button class="btn-outline" style="border-radius:20px; padding:5px 15px;" onclick="vote('${docSnap.id}')">❤️ ${d.votes || 0}</button>
                     ${isAdmin ? `<button onclick="deleteStory('${docSnap.id}')" style="color:#f85149; border:none; background:none;">SİL</button>` : ""}
